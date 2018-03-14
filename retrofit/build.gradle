@@ -1,0 +1,19 @@
+apply plugin: 'com.android.library'
+
+android {
+    compileSdkVersion 27
+    defaultConfig {
+        minSdkVersion 9
+        targetSdkVersion 27
+        versionCode 1
+        versionName "2.3.0"
+        consumerProguardFiles 'proguard-rules.pro'
+    }
+}
+
+dependencies {
+    implementation 'com.squareup.retrofit2:retrofit:2.3.0'
+    implementation 'com.squareup.okhttp3:logging-interceptor:3.9.1'
+}
+
+//apply from: "bintray.gradle"
