@@ -1,7 +1,7 @@
 Retrofit
 ========
 
-<img src="icon.png" alt="Icon"/>
+<img src="retrofit/icon.png" alt="Icon"/>
 
 Retrofit辅助库
 
