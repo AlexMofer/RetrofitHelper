@@ -26,7 +26,7 @@ import retrofit2.Response;
  * 弱引用回调
  * Created by Alex on 2018/3/14.
  */
-@SuppressWarnings("all")
+@SuppressWarnings("unused")
 public class WeakCallback<T> implements Callback<T> {
 
     private final WeakReference<Callback<T>> mWeakCallback;

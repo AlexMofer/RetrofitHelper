@@ -24,7 +24,7 @@ import retrofit2.Response;
  * 回调包装器
  * Created by Alex on 2018/3/14.
  */
-@SuppressWarnings("all")
+@SuppressWarnings({"WeakerAccess", "unused"})
 public class CallbackWrapper<T> implements Callback<T> {
 
     public static final int ERROR_CODE_THROWABLE = 0xff000001;

@@ -26,7 +26,7 @@ import retrofit2.Retrofit;
  * 请求工厂
  * Created by Alex on 2018/3/14.
  */
-@SuppressWarnings("all")
+@SuppressWarnings({"WeakerAccess", "unused"})
 public class CallFactory<S> {
     private static final long DEFAULT_TIMEOUT = 60000L;
     private final OkHttpClient.Builder mClientBuilder;
