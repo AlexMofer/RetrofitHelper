@@ -6,15 +6,17 @@ android {
         //noinspection MinSdkTooLow
         minSdkVersion 9
         targetSdkVersion 28
-        versionCode 2
-        versionName "2.5.0"
+        versionCode 3
+        versionName "2.5.0.1"
         consumerProguardFiles 'proguard-rules.pro'
     }
 }
 
 dependencies {
     api 'com.squareup.retrofit2:retrofit:2.5.0'
-    api 'com.squareup.okhttp3:logging-interceptor:3.9.1'
+    api 'com.squareup.okhttp3:logging-interceptor:3.12.0'
+//    implementation 'com.squareup.retrofit2:retrofit:2.5.0'
+//    implementation 'com.squareup.okhttp3:logging-interceptor:3.12.0'
 }
 
-apply from: "bintray.gradle"
+//apply from: "bintray.gradle"
