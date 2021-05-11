@@ -1,0 +1,86 @@
+apply plugin: 'maven'
+apply plugin: 'signing'
+
+javadoc {
+    options {
+        encoding "UTF-8"
+        charSet 'UTF-8'
+    }
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    archiveClassifier.set("javadoc")
+    from javadoc.destinationDir
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    archiveClassifier.set("sources")
+    from sourceSets.main.allSource
+}
+
+artifacts {
+    archives javadocJar, sourcesJar
+}
+
+final Properties pp = new Properties()
+pp.load(project.file("/pom.properties").newDataInputStream())
+
+final Properties vp = new Properties()
+vp.load(project.file("/version.properties").newDataInputStream())
+
+final Properties sp = new Properties()
+sp.load(project.file("../secret.properties").newDataInputStream())
+
+group = pp.getProperty("POM_GROUP_ID")
+archivesBaseName = pp.getProperty("POM_ARTIFACT_ID")
+version = vp.getProperty("VERSION_NAME")
+
+signing {
+    useGpgCmd()
+    sign configurations.archives
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+            repository(url: "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/") {
+                authentication(userName: sp.getProperty("NEXUS_USERNAME"), password: sp.getProperty("NEXUS_PASSWORD"))
+            }
+
+            snapshotRepository(url: "https://s01.oss.sonatype.org/content/repositories/snapshots/") {
+                authentication(userName: sp.getProperty("NEXUS_USERNAME"), password: sp.getProperty("NEXUS_PASSWORD"))
+            }
+
+            pom.project {
+                name pp.getProperty("POM_NAME")
+                packaging 'jar'
+                description pp.getProperty("POM_DESCRIPTION")
+                url pp.getProperty("POM_URL")
+
+                scm {
+                    connection pp.getProperty("POM_SCM_CONNECTION")
+                    developerConnection pp.getProperty("POM_SCM_DEV_CONNECTION")
+                    url pp.getProperty("POM_SCM_URL")
+                }
+
+                licenses {
+                    license {
+                        name pp.getProperty("POM_LICENCE_NAME")
+                        distribution pp.getProperty("POM_LICENCE_DIST")
+                        url pp.getProperty("POM_LICENCE_URL")
+                    }
+                }
+
+                developers {
+                    developer {
+                        id pp.getProperty("POM_DEVELOPER_ID")
+                        name pp.getProperty("POM_DEVELOPER_NAME")
+                        email pp.getProperty("POM_DEVELOPER_EMAIL")
+                    }
+                }
+            }
+        }
+    }
+}

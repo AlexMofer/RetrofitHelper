@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">RetrofitHelper</string>
-    <string name="main_test">测试</string>
-    <string name="main_input_hint">北京</string>
-    <string name="main_output_null">空结果</string>
-    <string name="main_output_error">出现错误:\ncode:%1$d\nmessage:%2$s\nresult:%3$s</string>
+    <string name="retrofit_test">测试</string>
+    <string name="retrofit_input_hint">北京</string>
+    <string name="retrofit_output_null">空结果</string>
+    <string name="retrofit_output_error">出现错误:\ncode:%1$d\nmessage:%2$s\nresult:%3$s</string>
 </resources>
