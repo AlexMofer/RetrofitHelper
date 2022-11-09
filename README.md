@@ -13,7 +13,7 @@ Retrofit辅助库，Gson解析，请求日志打印，解决回调强引用问�
 ```
 dependencies {
     ...
-    implementation 'io.github.alexmofer.retrofit:retrofit-helper:2.9.0'
+    implementation 'io.github.alexmofer.retrofit:retrofit-helper:2.9.0.1'
     ...
 }
 ```
