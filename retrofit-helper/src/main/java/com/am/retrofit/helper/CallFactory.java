@@ -27,38 +27,28 @@ import retrofit2.converter.gson.GsonConverterFactory;
  * 请求工厂
  * Created by Alex on 2018/3/14.
  */
-public class CallFactory<S> {
-    private static final long DEFAULT_TIMEOUT = 60000L;
-    private final OkHttpClient.Builder mClientBuilder = new OkHttpClient.Builder();
-    private final Retrofit.Builder mRetrofitBuilder = new Retrofit.Builder();
-    private String mBaseUrl;
-    private S mServer;
+public class CallFactory<I> {
 
-    public CallFactory() {
-        onInitializeOkHttpClientBuilder(mClientBuilder);
-        onInitializeRetrofitBuilder(mRetrofitBuilder);
-        mRetrofitBuilder.addConverterFactory(onCreateConverterFactory(mRetrofitBuilder));
-    }
+    private final String mBaseUrl;
+    private final Class<I> mServer;
+    private I mInterface;
 
-    public CallFactory(String baseUrl) {
-        setBaseUrl(baseUrl);
-        mRetrofitBuilder.addConverterFactory(onCreateConverterFactory(mRetrofitBuilder));
-    }
-
-    public CallFactory(Class<S> server) {
-        this();
-        createServer(server);
-    }
-
-    public CallFactory(String baseUrl, Class<S> server) {
-        this(baseUrl);
-        createServer(server);
-    }
-
-    public void setBaseUrl(String baseUrl) {
+    public CallFactory(String baseUrl, Class<I> server) {
         mBaseUrl = baseUrl;
-        onInitializeOkHttpClientBuilder(mClientBuilder);
-        onInitializeRetrofitBuilder(mRetrofitBuilder);
+        mServer = server;
+    }
+
+    /**
+     * 创建
+     *
+     * @param client   OkHttpClient构建器
+     * @param retrofit Retrofit构建器
+     * @return 接口
+     */
+    protected I onCreate(OkHttpClient.Builder client, Retrofit.Builder retrofit) {
+        onInitializeOkHttpClientBuilder(client);
+        onInitializeRetrofitBuilder(retrofit);
+        return retrofit.client(client.build()).build().create(getInterfaceClass());
     }
 
     /**
@@ -67,42 +57,16 @@ public class CallFactory<S> {
      * @param builder OkHttpClient构造器
      */
     protected void onInitializeOkHttpClientBuilder(OkHttpClient.Builder builder) {
-        final long timeout = getTimeout();
+        final long timeout = getTimeoutSeconds();
         builder.writeTimeout(timeout, TimeUnit.SECONDS);
         builder.readTimeout(timeout, TimeUnit.SECONDS);
         builder.connectTimeout(timeout, TimeUnit.SECONDS);
-        if (isLogging()) {
+        final HttpLoggingInterceptor.Level level = getLoggingLevel();
+        if (level != HttpLoggingInterceptor.Level.NONE) {
             final HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
-            onInitializeHttpLoggingInterceptor(interceptor);
+            interceptor.setLevel(level);
             builder.addInterceptor(interceptor);
         }
-    }
-
-    /**
-     * 获取通用超时时常
-     *
-     * @return 通用超时时常
-     */
-    public long getTimeout() {
-        return DEFAULT_TIMEOUT;
-    }
-
-    /**
-     * 是否输出Http相关日志
-     *
-     * @return 是否输出（默认不输出）
-     */
-    public boolean isLogging() {
-        return false;
-    }
-
-    /**
-     * 初始化HttpLoggingInterceptor日志拦截器
-     *
-     * @param interceptor HttpLoggingInterceptor 日志拦截器
-     */
-    protected void onInitializeHttpLoggingInterceptor(HttpLoggingInterceptor interceptor) {
-        interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
     }
 
     /**
@@ -111,56 +75,80 @@ public class CallFactory<S> {
      * @param builder RetrofitBuilder
      */
     protected void onInitializeRetrofitBuilder(Retrofit.Builder builder) {
-        if (mBaseUrl != null) {
-            builder.baseUrl(mBaseUrl);
-        }
+        builder.baseUrl(getBaseUrl());
+        builder.addConverterFactory(getConverterFactory());
     }
 
     /**
-     * 创建转换工厂
+     * 检查变化
+     */
+    protected void onCheckChange() {
+    }
+
+    /**
+     * 获取通用超时时长
      *
-     * @param builder RetrofitBuilder
+     * @return 通用超时时长
+     */
+    protected long getTimeoutSeconds() {
+        return 60000L;
+    }
+
+    /**
+     * 获取Http日志等级
+     *
+     * @return Http日志等级
+     */
+    protected HttpLoggingInterceptor.Level getLoggingLevel() {
+        return HttpLoggingInterceptor.Level.NONE;
+    }
+
+    /**
+     * 获取转换工厂
+     *
      * @return 转换工厂
      */
-    protected Converter.Factory onCreateConverterFactory(Retrofit.Builder builder) {
+    protected Converter.Factory getConverterFactory() {
         return GsonConverterFactory.create();
     }
 
     /**
-     * 创建服务接口
+     * 获取基础链接
      *
-     * @param server 服务接口
+     * @return 基础链接
      */
-    public void createServer(Class<S> server) {
-        mServer = mRetrofitBuilder.client(mClientBuilder.build()).build().create(server);
+    protected String getBaseUrl() {
+        return mBaseUrl;
     }
 
     /**
-     * 获取客户端构建器
-     * 对构建器做修改后需重新调用{@link #createServer(Class)}
+     * 获取接口类名
      *
-     * @return OkHttpClient.Builder
+     * @return 类名
      */
-    public final OkHttpClient.Builder getClientBuilder() {
-        return mClientBuilder;
-    }
-
-    /**
-     * 获取Retrofit构建器
-     * 对构建器做修改后需重新调用{@link #createServer(Class)}
-     *
-     * @return Retrofit.Builder
-     */
-    public final Retrofit.Builder getRetrofitBuilder() {
-        return mRetrofitBuilder;
-    }
-
-    /**
-     * 获取服务接口
-     *
-     * @return 服务接口
-     */
-    public final S getServer() {
+    protected Class<I> getInterfaceClass() {
         return mServer;
+    }
+
+    /**
+     * 刷新接口
+     */
+    public void invalidateInterface() {
+        mInterface = null;
+    }
+
+    /**
+     * 获取接口
+     *
+     * @return 接口
+     */
+    public I getInterface() {
+        onCheckChange();
+        if (mInterface == null) {
+            final OkHttpClient.Builder clientBuilder = new OkHttpClient.Builder();
+            final Retrofit.Builder retrofitBuilder = new Retrofit.Builder();
+            mInterface = onCreate(clientBuilder, retrofitBuilder);
+        }
+        return mInterface;
     }
 }
