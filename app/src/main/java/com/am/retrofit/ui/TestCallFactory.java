@@ -2,6 +2,7 @@ package com.am.retrofit.ui;
 
 import com.am.retrofit.helper.CallFactory;
 
+import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Call;
 
 /**
@@ -9,11 +10,11 @@ import retrofit2.Call;
  * Created by Alex on 2019/1/29.
  */
 
-public class TestCallFactory extends CallFactory<TestService> {
+public class TestCallFactory extends CallFactory<TestInterface> {
     private static TestCallFactory mInstance;
 
     private TestCallFactory() {
-        super("https://www.sojson.com/open/", TestService.class);
+        super("http://t.weather.itboy.net", TestInterface.class);
     }
 
     private static TestCallFactory getInstance() {
@@ -23,17 +24,17 @@ public class TestCallFactory extends CallFactory<TestService> {
         return mInstance;
     }
 
-    static Call<TestBean> getWeather(@SuppressWarnings("SameParameterValue") String city) {
-        return getInstance().getServer().getWeather(city);
+    static Call<TestData> getWeather() {
+        return getInstance().getInterface().getWeather();
     }
 
     @Override
-    public long getTimeout() {
-        return 15000L;
+    protected long getTimeoutSeconds() {
+        return 15;
     }
 
     @Override
-    public boolean isLogging() {
-        return BuildConfig.DEBUG;
+    protected HttpLoggingInterceptor.Level getLoggingLevel() {
+        return HttpLoggingInterceptor.Level.BODY;
     }
 }
